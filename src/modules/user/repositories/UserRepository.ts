@@ -1,5 +1,5 @@
 import prisma from "../../../libs/prisma/prisma-client";
-import { IUserRepository } from "../../authentication/interfaces/IUserRepository";
+import { IUserRepository } from "../interfaces/IUserRepository";
 import { User } from "../../../generated/prisma";
 
 class UserRepository implements IUserRepository {
@@ -18,6 +18,33 @@ class UserRepository implements IUserRepository {
       data: {
         email,
         password,
+      },
+    });
+  }
+  async changeEmail(email: string, newEmail: string): Promise<void> {
+    await prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        email: newEmail,
+      },
+    });
+  }
+  async changePassword(email: string, newPassword: string): Promise<void> {
+    await prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        password: newPassword,
+      },
+    });
+  }
+  async delete(email: string): Promise<void> {
+    await prisma.user.delete({
+      where: {
+        email,
       },
     });
   }
