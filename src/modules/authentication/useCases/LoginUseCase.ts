@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { IPasswordHasherProvider } from "../interfaces/IPasswordHasherProvider";
-import { IUserRepository } from "../interfaces/IUserRepository";
+import { IUserRepository } from "../../user/interfaces/IUserRepository";
 
 @injectable()
 class LoginUseCase {
