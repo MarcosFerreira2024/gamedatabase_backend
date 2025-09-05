@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IPasswordHasherProvider } from "../interfaces/IPasswordHasherProvider";
 import { IUserRepository } from "../../user/interfaces/IUserRepository";
+import { ITokenProvider } from "../interfaces/ITokenProvider";
 
 @injectable()
 class LoginUseCase {
@@ -18,14 +19,9 @@ class LoginUseCase {
 
     if (!passwordMatch) throw new Error("Dados inválidos");
 
-    const token = this.tokenProvider.generateToken(email);
+    const token = this.tokenProvider.generate(email);
     return token;
   }
-
-  // verificar existencia do usuario
-  // comparar senhas
-  // gerar token
-  // retornar token
 }
 
 export { LoginUseCase };
