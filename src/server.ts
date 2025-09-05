@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { routes } from "./routes/routes";
 import { container } from "tsyringe";
 import "./shared/containers";
+import "./job/syncCatalog";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
