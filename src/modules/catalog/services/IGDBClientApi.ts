@@ -10,7 +10,7 @@ class IGDBApiClient {
   async fetch(endpoint: string, ids: number[], fields: string[] = ["name"]) {
     const token =
       this.authService.getToken() || (await this.authService.requestApiKey());
-    if (ids.length === 0) return [];
+    if (!ids || ids.length === 0) return [];
 
     const body = `
       fields ${fields.join(",")};
@@ -31,7 +31,7 @@ class IGDBApiClient {
     return response.json();
   }
 
-  async fetchAll(endpoint: string, fields: string[], maxGames = 2) {
+  async fetchAll(endpoint: string, fields: string[], maxGames = 5000) {
     const token =
       this.authService.getToken() || (await this.authService.requestApiKey());
     const results: any[] = [];
