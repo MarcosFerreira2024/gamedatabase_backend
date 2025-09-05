@@ -1,4 +1,6 @@
 interface ITokenProvider {
-  generateToken(email: string): string;
-  verifyToken(token: string): string;
+  generate(email: string): string;
+  verify(token: string): string;
 }
+
+export { ITokenProvider };
