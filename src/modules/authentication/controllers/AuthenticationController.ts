@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { zodSchemaHandler } from "../../../shared/helpers/zodSchemaHandler";
-import { loginSchema, signUpSchema } from "../schema/schema";
+import { loginSchema, signUpSchema } from "../../../shared/schemas/schema";
 import { container } from "tsyringe";
 import { LoginUseCase } from "../useCases/LoginUseCase";
 import { SignUpUseCase } from "../useCases/SignUpUseCase";
+import { errorHandler } from "../../../shared/helpers/errorHandler";
 
 class AuthenticationController {
-  async login(req: Request, res: Response) {
+  async defaultLogin(req: Request, res: Response) {
     try {
       const { email, password } = zodSchemaHandler(loginSchema, req.body);
 
@@ -16,12 +17,7 @@ class AuthenticationController {
 
       return res.status(200).json({ token });
     } catch (e) {
-      if (e instanceof Error)
-        return res.status(400).json({ message: e.message });
-      else
-        return res
-          .status(200)
-          .json({ message: "Ocorreu um erro interno, tente novamente" });
+      errorHandler(e, res);
     }
   }
 
@@ -33,12 +29,7 @@ class AuthenticationController {
 
       return res.status(200).json({ message: "Usuário criado com sucesso" });
     } catch (e) {
-      if (e instanceof Error)
-        return res.status(400).json({ message: e.message });
-      else
-        return res
-          .status(500)
-          .json({ message: "Ocorreu um erro interno, tente novamente" });
+      errorHandler(e, res);
     }
   }
 }
