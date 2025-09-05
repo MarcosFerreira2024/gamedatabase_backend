@@ -15,10 +15,132 @@ datasource db {
 }
 
 model User {
-  id String @id @default(cuid()) 
-  email String @unique
-  password String
+  id      Int @id @default(autoincrement())
+  email     String @unique
+  password  String
 
+  favorites Game[] @relation("UserFavorites")
+  wishlist  Game[] @relation("UserWishlist")
 }
 
+model Game {
+  id                    Int @id @default(autoincrement())
+  igdbId                Int      @unique
+  name                  String
+  summary               String?
+  storyline             String?
+  cover                 String?
+  first_release_date    DateTime?
+  url                   String?
+  createdAt             DateTime
+  updatedAt             DateTime
 
+  criticScore           Int?
+  criticCount           Int?
+  userScore             Int?
+  userCount             Int?
+  totalScore            Int?
+  totalCount            Int?
+
+  developers            Company[] @relation("GameDevelopers")
+  publishers            Company[] @relation("GamePublishers")
+  genres                Genre[]   @relation("GameGenres")
+  platforms             Platform[] @relation("GamePlatforms")
+  modes                 Mode[]    @relation("GameModes")
+  themes                Theme[]   @relation("GameThemes")
+  playerPerspectives    PlayerPerspective[] @relation("GamePlayerPerspectives")
+  artworks              Artwork[]
+  screenshots           Screenshot[]
+  videos                Video[]
+  websites              Website[]
+  collections           Collection[] @relation("GameCollections")
+  franchises            Franchise[] @relation("GameFranchises")
+  gameEngines           GameEngine[] @relation("GameEngines")
+
+  favoritedBy           User[] @relation("UserFavorites")
+  wishedBy              User[] @relation("UserWishlist")
+}
+
+model Company {
+  id      Int @id @default(autoincrement())
+  name      String @unique
+
+  developedGames Game[] @relation("GameDevelopers")
+  publishedGames Game[] @relation("GamePublishers")
+}
+
+model Genre {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameGenres")
+}
+
+model Platform {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GamePlatforms")
+}
+
+model Mode {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameModes")
+}
+
+model Theme {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameThemes")
+}
+
+model PlayerPerspective {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GamePlayerPerspectives")
+}
+
+model Artwork {
+  id    Int @id @default(autoincrement())
+  url     String @unique
+  gameId  Int
+  game    Game   @relation(fields: [gameId], references: [id])
+}
+
+model Screenshot {
+  id    Int @id @default(autoincrement())
+  url     String @unique
+  gameId  Int
+  game    Game   @relation(fields: [gameId], references: [id])
+}
+
+model Video {
+  id    Int @id @default(autoincrement())
+  name    String
+  url     String @unique
+  gameId  Int
+  game    Game   @relation(fields: [gameId], references: [id])
+}
+
+model Collection {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameCollections")
+}
+
+model Franchise {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameFranchises")
+}
+
+model GameEngine {
+  id  Int @id @default(autoincrement())
+  name  String @unique
+  games Game[] @relation("GameEngines")
+}
+model Website {
+  id     Int    @id @default(autoincrement())
+  url    String @unique
+  gameId Int
+  game    Game   @relation(fields: [gameId], references: [id])
+}
