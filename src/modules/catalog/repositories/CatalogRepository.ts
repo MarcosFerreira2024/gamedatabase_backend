@@ -1,28 +1,164 @@
 import { injectable } from "tsyringe";
-import { GameData } from "../interfaces/GameData";
 import { ICatalogRepository } from "../interfaces/ICatalogRepository";
 import prisma from "../../../libs/prisma/prisma-client";
+import { Game } from "../../../generated/prisma";
 
 @injectable()
 export class CatalogRepository implements ICatalogRepository {
   constructor() {}
 
-  async getOneById(id: number) {
+  async getOneById(id: number): Promise<Game | null> {
     return await prisma.game.findUnique({
       where: { igdbId: id },
-      select: {
-        name: true,
-        cover: true,
-        first_release_date: true,
-        url: true,
-        videos: true,
+      include: {
+        franchises: true,
+        artworks: true,
+        collections: true,
+        developers: true,
+        gameEngines: true,
+        genres: true,
+        modes: true,
         platforms: true,
+        publishers: true,
+        playerPerspectives: true,
+        screenshots: true,
+        themes: true,
+        videos: true,
+        websites: true,
       },
     });
   }
 
-  async getAll() {
+  async getByQuery(
+    searchParams: SearchParams,
+    sortParams: SortParams,
+    take: Take,
+    offset: number
+  ): Promise<FilteredGames[] | FilteredGames | []> {
     return await prisma.game.findMany({
+      where: {
+        ...(searchParams.name && { name: { contains: searchParams.name } }),
+        ...(searchParams.genres && {
+          genres: {
+            some: {
+              name: {
+                contains: searchParams.genres,
+              },
+            },
+          },
+        }),
+        ...(searchParams.platforms && {
+          platforms: {
+            some: {
+              name: {
+                contains: searchParams.platforms,
+              },
+            },
+          },
+        }),
+        ...(searchParams.summary && {
+          summary: { contains: searchParams.summary },
+        }),
+        ...(searchParams.franchises && {
+          franchises: {
+            some: {
+              name: {
+                contains: searchParams.franchises,
+              },
+            },
+          },
+        }),
+        ...(searchParams.modes && {
+          modes: {
+            some: {
+              name: {
+                contains: searchParams.modes,
+              },
+            },
+          },
+        }),
+        ...(searchParams.developers && {
+          developers: {
+            some: {
+              name: {
+                contains: searchParams.developers,
+              },
+            },
+          },
+        }),
+        ...(searchParams.publishers && {
+          publishers: {
+            some: {
+              name: {
+                contains: searchParams.publishers,
+              },
+            },
+          },
+        }),
+        ...(searchParams.usersScore && {
+          usersScore: { contains: searchParams.usersScore },
+        }),
+        ...(searchParams.themes && {
+          themes: {
+            some: {
+              name: {
+                contains: searchParams.themes,
+              },
+            },
+          },
+        }),
+        ...(searchParams.playerPerspectives && {
+          playerPerspectives: {
+            some: {
+              name: {
+                contains: searchParams.playerPerspectives,
+              },
+            },
+          },
+        }),
+        ...(searchParams.first_release_date && {
+          first_release_date: { equals: searchParams.first_release_date },
+        }),
+        ...(searchParams.gameEngines && {
+          gameEngines: {
+            some: {
+              name: {
+                contains: searchParams.gameEngines,
+              },
+            },
+          },
+        }),
+        ...(searchParams.collections && {
+          collections: {
+            some: {
+              name: {
+                contains: searchParams.collections,
+              },
+            },
+          },
+        }),
+      },
+
+      orderBy: sortParams?.sortBy
+        ? { [sortParams.sortBy]: sortParams.order ?? "asc" }
+        : undefined,
+
+      take,
+      skip: offset,
+
+      select: {
+        cover: true,
+        name: true,
+        igdbId: true,
+        screenshots: true,
+        videos: true,
+        url: true,
+      },
+    });
+  }
+
+  async getAll(): Promise<Game[]> {
+    const game = await prisma.game.findMany({
       include: {
         artworks: true,
         collections: true,
@@ -35,15 +171,17 @@ export class CatalogRepository implements ICatalogRepository {
         screenshots: true,
         publishers: true,
         themes: true,
+
         videos: true,
         websites: true,
         playerPerspectives: true,
       },
       orderBy: {
-        first_release_date: "desc",
         totalScore: "desc",
+        first_release_date: "desc",
       },
     });
+    return game;
   }
 
   private safeArray<T>(arr?: T | T[]): T[] {
@@ -51,7 +189,6 @@ export class CatalogRepository implements ICatalogRepository {
     return Array.isArray(arr) ? arr : [arr];
   }
 
-  // Para entidades com name como único (Company, Genre, Platform, etc.)
   private mapConnectOrCreateByName<T extends { id?: number; name: string }>(
     items?: T[]
   ) {
@@ -61,7 +198,6 @@ export class CatalogRepository implements ICatalogRepository {
     }));
   }
 
-  // Para entidades com url como único (Artwork, Screenshot, Website)
   private mapConnectOrCreateByUrl<T extends { url: string }>(items?: T[]) {
     return this.safeArray(items).map((item) => ({
       where: { url: item.url },
@@ -69,7 +205,6 @@ export class CatalogRepository implements ICatalogRepository {
     }));
   }
 
-  // Para videos (name + url obrigatórios)
   private mapConnectOrCreateVideos(items?: { name: string; url: string }[]) {
     return this.safeArray(items).map((item) => ({
       where: { url: item.url },
@@ -95,7 +230,6 @@ export class CatalogRepository implements ICatalogRepository {
           totalCount: gameData.totalCount,
           updatedAt: gameData.updatedAt,
           url: gameData.url,
-          // Relações
           developers: {
             connectOrCreate: this.mapConnectOrCreateByName(gameData.developers),
           },
@@ -161,7 +295,6 @@ export class CatalogRepository implements ICatalogRepository {
           createdAt: gameData.createdAt,
           updatedAt: gameData.updatedAt,
           url: gameData.url,
-          // Relações
           developers: {
             connectOrCreate: this.mapConnectOrCreateByName(gameData.developers),
           },
