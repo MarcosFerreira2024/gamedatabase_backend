@@ -1,42 +1,84 @@
 import { Request, Response } from "express";
 import { CatalogRepository } from "../repositories/CatalogRepository";
-
+import { container } from "tsyringe";
+import { SearchGamesUseCase } from "../useCases/SearchGamesUseCase";
+import { zodSchemaHandler } from "../../../shared/helpers/zodSchemaHandler";
+import z from "zod";
+import { searchSchema } from "../schema/schema";
+import { SearchAllGamesUseCase } from "../useCases/SearchAllGamesUseCase";
+import { errorHandler } from "../../../shared/helpers/errorHandler";
+import { GetGameInfoByIdUseCase } from "../useCases/GetGameInfoByIdUseCase";
 class CatalogController {
   async getGames(req: Request, res: Response) {
     try {
-      const queryParams = req.query;
+      const query = req.query;
 
-      if (queryParams && queryParams.length != undefined) {
-        console.log(queryParams.length);
-        res.status(200).json({
-          message: "QueryParams",
-          tem: queryParams,
-        });
+      const allowedParams = [
+        "name",
+        "genres",
+        "sortBy",
+        "page",
+        "take",
+        "order",
+        "platforms",
+        "summary",
+        "franchises",
+        "modes",
+        "developers",
+        "publishers",
+        "usersScore",
+        "themes",
+        "playerPerspectives",
+        "first_release_date",
+        "gameEngines",
+        "collections",
+      ];
+
+      let params = Object.fromEntries(
+        Object.entries(query).filter(([key]) => allowedParams.includes(key))
+      );
+      const normalizedParams = Object.fromEntries(
+        Object.entries(params).map(([key, value]) => [
+          key,
+          value === "" ? undefined : value,
+        ])
+      );
+
+      const validatedData = zodSchemaHandler(searchSchema, normalizedParams);
+
+      const { take, page, sortBy, order, ...searchParams } = validatedData;
+
+      const offset = take * (page - 1);
+
+      if (!searchParams) {
+        const allGames = await container
+          .resolve(SearchAllGamesUseCase)
+          .execute({ sortBy, order } as SortParams, take, offset);
+
+        return res.status(200).json(allGames);
       }
 
-      const repo = new CatalogRepository();
+      const games = await container
+        .resolve(SearchGamesUseCase)
+        .execute(searchParams, { sortBy, order } as SortParams, take, offset);
 
-      const item = await repo.getAll();
-
-      res.status(200).json({
-        item,
-      });
-      // retorno todos os jogos se n tiver parametro em ordem descrescente por popularidade
-    } catch (e) {}
+      res.status(200).json(games);
+      return;
+    } catch (e) {
+      errorHandler(e, res);
+    }
   }
 
   async getGameById(req: Request, res: Response) {
     try {
       const id = +req.params.id;
 
-      const repo = new CatalogRepository();
+      const game = await container.resolve(GetGameInfoByIdUseCase).execute(id);
 
-      const item = await repo.getOneById(id);
-
-      res.status(200).json({
-        item,
-      });
-    } catch (e) {}
+      return res.status(200).json(game);
+    } catch (e) {
+      errorHandler(e, res);
+    }
   }
 }
 
