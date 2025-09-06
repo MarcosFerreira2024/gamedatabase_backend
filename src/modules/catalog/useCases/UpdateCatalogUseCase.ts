@@ -2,7 +2,6 @@ import { inject, injectable } from "tsyringe";
 import { CatalogRepository } from "../repositories/CatalogRepository";
 import { IGDBApiClient } from "../services/IGDBClientApi";
 import { IGDBGameMapper } from "../services/IGDBGameMapper";
-import { GameData } from "../interfaces/GameData";
 
 @injectable()
 export class UpdateCatalogUseCase {

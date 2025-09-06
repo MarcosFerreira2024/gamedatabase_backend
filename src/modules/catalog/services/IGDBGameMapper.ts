@@ -1,6 +1,5 @@
 import { injectable, inject } from "tsyringe";
 import { IGDBApiClient } from "./IGDBClientApi";
-import { GameData } from "../interfaces/GameData";
 
 @injectable()
 class IGDBGameMapper {
