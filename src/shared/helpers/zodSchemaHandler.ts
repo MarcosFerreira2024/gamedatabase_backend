@@ -1,6 +1,6 @@
 import { ZodType } from "zod";
 
-export function zodSchemaHandler<T>(schema: ZodType<T>, data: T): T {
+export function zodSchemaHandler<T>(schema: ZodType<T>, data: unknown): T {
   if (!data) throw new Error("requisição sem dados");
   const validation = schema.safeParse(data);
 
