@@ -5,7 +5,7 @@ import { catalog_routes } from "../modules/catalog/routes/route";
 
 const routes = Router();
 
-routes.use(auth_routes);
+routes.use("/auth", auth_routes);
 routes.use("/user", user_routes);
 routes.use("/games", catalog_routes);
 
