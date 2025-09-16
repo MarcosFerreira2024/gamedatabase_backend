@@ -5,9 +5,9 @@ const catalog_routes = Router();
 
 const controller = new CatalogController();
 
-catalog_routes.get("/", (req: Request, res: Response) =>
-  controller.getGames(req, res)
-);
+catalog_routes.get("/", (req: Request, res: Response) => {
+  controller.getGames(req, res);
+});
 
 catalog_routes.get("/:id", (req: Request, res: Response) =>
   controller.getGameById(req, res)
