@@ -14,8 +14,12 @@ class LoginUseCase {
 
   async execute(email: string, password: string) {
     const user = await this.userRepository.findByEmail(email);
+
     if (!user) throw new Error("Esse usuário não existe, registre-se");
-    const passwordMatch = this.passwordHasher.compare(password, user.password);
+    const passwordMatch = await this.passwordHasher.compare(
+      password,
+      user.password
+    );
 
     if (!passwordMatch) throw new Error("Dados inválidos");
 
