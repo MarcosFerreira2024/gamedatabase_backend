@@ -7,5 +7,5 @@ const controller = new AuthenticationController();
 
 auth_routes.post("/login", (req, res) => controller.defaultLogin(req, res));
 auth_routes.post("/signup", (req, res) => controller.signUp(req, res));
-
+auth_routes.post("/token", (req, res) => controller.verifyToken(req, res));
 export { auth_routes };
