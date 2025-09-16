@@ -31,12 +31,13 @@ class IGDBApiClient {
     return response.json();
   }
 
-  async fetchAll(endpoint: string, fields: string[], maxGames = 5000) {
+  async fetchAll(endpoint: string, fields: string[], maxGames = 200) {
     const token =
       this.authService.getToken() || (await this.authService.requestApiKey());
     const results: any[] = [];
     let offset = 0;
     const limit = 50;
+    const now = Date.now();
 
     while (results.length < maxGames) {
       const body = `
@@ -44,7 +45,7 @@ class IGDBApiClient {
             limit ${limit};
             offset ${offset};
             sort popularity desc;
-            where first_release_date != null | first_release_date > 0;
+
           `;
 
       const response = await fetch(`https://api.igdb.com/v4/${endpoint}`, {
