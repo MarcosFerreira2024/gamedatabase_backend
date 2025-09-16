@@ -11,9 +11,18 @@ class TokenProvider implements ITokenProvider {
   }
 
   verify(token: string): string {
-    const verifiedToken = JWT.verify(token, process.env.JWT_SECRET as string);
-
-    return verifiedToken as string;
+    try {
+      JWT.verify(token, process.env.JWT_SECRET as string);
+      return "Token válido";
+    } catch (error: any) {
+      if (error.name === "TokenExpiredError") {
+        throw new Error("Token expirado");
+      }
+      if (error.name === "NotBeforeError") {
+        throw new Error("Token ainda não está válido");
+      }
+      throw new Error("Token inválido");
+    }
   }
 }
 export { TokenProvider };
